@@ -1,0 +1,32 @@
+# ==========================================================
+# Nixpacks configuration for Coolify
+# This builds the frontend & runs the Waitress WSGI backend
+# ==========================================================
+
+[providers]
+# Enable both Node.js (for frontend build) and Python (for backend execution)
+node = {}
+python = {}
+
+[phases.setup]
+nixPkgs = ["python311", "nodejs"]
+
+[phases.install]
+# Install node packages for frontend and pip packages for backend
+cmds = [
+  "npm install",
+  "python -m pip install -r backend/requirements.txt"
+]
+
+[phases.build]
+# Compile the React frontend and copy it to Flask's distribution directory
+cmds = [
+  "npm run build",
+  "mkdir -p backend/app/static/dist",
+  "cp -r dist/* backend/app/static/dist/"
+]
+
+[start]
+# Launch Waitress server inside the backend folder on port 5000
+cmd = "cd backend && python wsgi.py"
+runImage = "ubuntu:22.04"
